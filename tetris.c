@@ -1,11 +1,179 @@
-#include <stdio.h>
-
 // Desafio Tetris Stack
 // Tema 3 - Integração de Fila e Pilha
 // Este código inicial serve como base para o desenvolvimento do sistema de controle de peças.
 // Use as instruções de cada nível para desenvolver o desafio.
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
-int main() {
+#define MAX 5
+
+int contador = 0;
+
+typedef struct
+{
+    char tipo;
+    int id;
+} Peca;
+
+typedef struct
+{
+    Peca pecas[MAX];
+    int ini;
+    int fim;
+    int total;
+} Fila;
+
+// Função Buffer de entrada
+void limparBufferEntrada()
+{
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
+}
+
+Peca gerarPeca()
+{
+    char tipos[] = {'I', 'O', 'T', 'L'};
+    int i = rand() % 4;
+    Peca sorteada;
+    sorteada.tipo = tipos[i];
+    sorteada.id = contador;
+    contador++;
+    return sorteada;
+}
+
+void inicializarFila(Fila *f)
+{
+    f->ini = 0;
+    f->fim = 0;
+    f->total = 0;
+};
+
+int filaCheia(Fila *f)
+{
+    return f->total == MAX;
+}
+
+int filaVazia(Fila *f)
+{
+    return f->total == 0;
+}
+
+void desenfileirar(Fila *f, Peca *p)
+{
+    if (filaVazia(f))
+    {
+        printf("Fila vazia. Impossível remover.\n");
+        return;
+    }
+
+    *p = f->pecas[f->ini];
+    f->ini = (f->ini + 1) % MAX;
+    f->total--;
+}
+
+void enfileirar(Fila *f, Peca sorteada)
+{
+    if (filaCheia(f))
+    {
+        printf("Fila cheia. Não é possível inserir.\n");
+        return;
+    }
+
+    f->pecas[f->fim] = sorteada; // Pegue a peça sorteada e guarde dentro do vetor
+
+    f->fim = (f->fim + 1) % MAX; // Depois de inserir a peça, avance o marcador de fim da fila para a próxima posição
+
+    f->total++; // Aumente em 1 a quantidade total de peças na fila
+}
+
+void mostrarFila(Fila *f)
+{
+    printf("--== Fila de Pecas ==--\n");
+
+    int i, idx;
+
+    idx = f->ini;
+
+    for (i = 0; i < f->total; i++)
+    {
+        printf("[%c %d] ",
+               f->pecas[idx].tipo,
+               f->pecas[idx].id);
+
+        idx = (idx + 1) % MAX;
+    }
+
+    printf("\n");
+}
+
+void exibirMenu()
+{
+    printf("--== Menu de Ações ==--\n");
+    printf("1 - Jogar Peça\n");
+    printf("2 - Inserir Nova Peça\n"); //por enquanto está função está sem uso porque apeça é gerada automaticamente após a remoção
+    printf("0 - Sair de fininho\n");
+}
+
+//----------------------------------------
+// ============ FUNÇÃO MAIN =============
+//----------------------------------------
+
+int main()
+{
+    Fila fila;
+    Peca peca;
+
+    srand(time(NULL));
+
+    inicializarFila(&fila);
+
+    for (int i = 0; i <= MAX - 1; i++)
+    {
+        enfileirar(&fila, gerarPeca());
+    }
+
+    int opcao;
+    Peca pecas;
+
+    // --== Laço Principal do menu ==--
+    do
+    {
+        mostrarFila(&fila);
+        exibirMenu();
+        scanf("%d", &opcao);
+        limparBufferEntrada();
+
+        switch (opcao)
+        {
+        case 1:
+        {
+            desenfileirar(&fila, &peca);
+            enfileirar(&fila, gerarPeca()); //gera nova uma nova peça e insere automaticamente no fim da fila
+            break;
+        }
+        case 2:
+        {
+            enfileirar(&fila, gerarPeca());
+            break;
+        }
+        case 0:
+            printf("\nSaindo do sistema...\n");
+            break;
+
+        default:
+            printf("\nOpão inválida! Pressione Enter para tentar novamente.");
+            getchar();
+            break;
+        }
+    } while (opcao != 0);
+
+    return 0;
+}
+
+
 
     // 🧩 Nível Novato: Fila de Peças Futuras
     //
@@ -50,7 +218,4 @@ int main() {
     //      4 - Trocar peça da frente com topo da pilha
     //      5 - Trocar 3 primeiros da fila com os 3 da pilha
 
-
-    return 0;
-}
 
